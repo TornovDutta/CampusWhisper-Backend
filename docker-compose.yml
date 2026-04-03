@@ -1,0 +1,28 @@
+version: '3.8'
+
+services:
+  whisper-db:
+    image: postgres:15-alpine
+    container_name: whisper-postgres
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: whisper
+      POSTGRES_USER: whisper_user
+      POSTGRES_PASSWORD: whisper_password
+    volumes:
+      - whisper-pg-data:/var/lib/postgresql/data
+    restart: unless-stopped
+
+  whisper-redis:
+    image: redis:7-alpine
+    container_name: whisper-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - whisper-redis-data:/data
+    restart: unless-stopped
+
+volumes:
+  whisper-pg-data:
+  whisper-redis-data:
