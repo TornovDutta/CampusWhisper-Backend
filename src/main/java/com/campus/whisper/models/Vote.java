@@ -24,5 +24,5 @@ public class Vote {
     private Long userId;
 
     @Column(nullable = false)
-    private String type; // "upvote" or "downvote"
+    private VoteType type;
 }
