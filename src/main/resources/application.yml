@@ -11,7 +11,7 @@ spring:
   application:
     name: whisper
   datasource:
-    url: jdbc:postgresql://postgres:5432/whisper
+    url: jdbc:postgresql://database:5432/whisper
     username: whisper_user
     password: whisper_password
   jpa:
@@ -23,7 +23,7 @@ spring:
         dialect: org.hibernate.dialect.PostgreSQLDialect
   data:
     redis:
-      host: localhost
+      host: cache
       port: 6379
 
 jwt:

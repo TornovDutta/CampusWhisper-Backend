@@ -1,7 +1,7 @@
 version: '3.8'
 
 services:
-  database   :
+  database:
     image: postgres:15-alpine
     container_name: whisper-postgres
     ports:
@@ -13,8 +13,10 @@ services:
     volumes:
       - whisper-pg-data:/var/lib/postgresql/data
     restart: unless-stopped
+    networks:
+      - whisper-network
 
-  Cache:
+  cache:
     image: redis:7-alpine
     container_name: whisper-redis
     ports:
@@ -22,7 +24,34 @@ services:
     volumes:
       - whisper-redis-data:/data
     restart: unless-stopped
+    networks:
+      - whisper-network
+
+  app:
+    build: .
+    container_name: campus-whisper
+    ports:
+      - "8443:8443"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://database:5432/whisper
+      SPRING_DATASOURCE_USERNAME: whisper_user
+      SPRING_DATASOURCE_PASSWORD: whisper_password
+
+      SPRING_REDIS_HOST: cache
+      SPRING_REDIS_PORT: 6379
+
+      SERVER_PORT: 8443
+    depends_on:
+      - database
+      - cache
+    restart: unless-stopped
+    networks:
+      - whisper-network
 
 volumes:
   whisper-pg-data:
   whisper-redis-data:
+
+networks:
+  whisper-network:
+    driver: bridge
