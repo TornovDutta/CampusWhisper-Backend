@@ -24,5 +24,6 @@ public class Vote {
     private Long userId;
 
     @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
     private VoteType type;
 }
