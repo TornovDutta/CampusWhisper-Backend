@@ -5,11 +5,11 @@ services:
     image: postgres:15-alpine
     container_name: whisper-postgres
     ports:
-      - "5432:5432"
+      - "${DB_PORT:-5432}:5432"
     environment:
-      POSTGRES_DB: whisper
-      POSTGRES_USER: whisper_user
-      POSTGRES_PASSWORD: whisper_password
+      POSTGRES_DB: ${DB_NAME:-whisper}
+      POSTGRES_USER: ${DB_USER:-whisper_user}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-whisper_password}
     volumes:
       - whisper-pg-data:/var/lib/postgresql/data
     restart: unless-stopped
@@ -20,7 +20,7 @@ services:
     image: redis:7-alpine
     container_name: whisper-redis
     ports:
-      - "6379:6379"
+      - "${REDIS_PORT:-6379}:6379"
     volumes:
       - whisper-redis-data:/data
     restart: unless-stopped
@@ -31,16 +31,18 @@ services:
     build: .
     container_name: campus-whisper
     ports:
-      - "8443:8443"
+      - "${SERVER_PORT:-8080}:${SERVER_PORT:-8080}"
+    env_file:
+      - .env
     environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://database:5432/whisper
-      SPRING_DATASOURCE_USERNAME: whisper_user
-      SPRING_DATASOURCE_PASSWORD: whisper_password
-
+      SPRING_DATASOURCE_URL: jdbc:postgresql://database:5432/${DB_NAME:-whisper}
+      SPRING_DATASOURCE_USERNAME: ${DB_USER:-whisper_user}
+      SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD:-whisper_password}
       SPRING_REDIS_HOST: cache
       SPRING_REDIS_PORT: 6379
-
-      SERVER_PORT: 8443
+      SERVER_PORT: ${SERVER_PORT:-8080}
+      JWT_SECRET: ${JWT_SECRET:-404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970}
+      JWT_EXPIRATION_MS: ${JWT_EXPIRATION_MS:-86400000}
     depends_on:
       - database
       - cache

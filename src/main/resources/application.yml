@@ -1,31 +1,31 @@
-
 server:
-  port: 8443
+  port: ${SERVER_PORT:8080}
   ssl:
-    key-store: classpath:keystore.p12
-    key-store-password: whisper
-    key-store-type: PKCS12
-    key-alias: whisper
+    enabled: ${SSL_ENABLED:false}
+    key-store: ${SSL_KEY_STORE:classpath:keystore.p12}
+    key-store-password: ${SSL_KEY_STORE_PASSWORD:whisper}
+    key-store-type: ${SSL_KEY_STORE_TYPE:PKCS12}
+    key-alias: ${SSL_KEY_ALIAS:whisper}
 
 spring:
   application:
     name: whisper
   datasource:
-    url: jdbc:postgresql://database:5432/whisper
-    username: whisper_user
-    password: whisper_password
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:whisper}}
+    username: ${DB_USER:${SPRING_DATASOURCE_USERNAME:whisper_user}}
+    password: ${DB_PASSWORD:${SPRING_DATASOURCE_PASSWORD:whisper_password}}
   jpa:
     hibernate:
-      ddl-auto: update
-    show-sql: true
+      ddl-auto: ${HIBERNATE_DDL_AUTO:update}
+    show-sql: ${SHOW_SQL:true}
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
   data:
     redis:
-      host: cache
-      port: 6379
+      host: ${REDIS_HOST:${SPRING_REDIS_HOST:localhost}}
+      port: ${REDIS_PORT:${SPRING_REDIS_PORT:6379}}
 
 jwt:
-  secret: 404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970
-  expirationMs: 86400000 # 24 hours
+  secret: ${JWT_SECRET:404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970}
+  expirationMs: ${JWT_EXPIRATION_MS:86400000}
