@@ -81,17 +81,41 @@ public class WhisperApplication {
                 }
             }
 
-            // Dedicated Redis URL handler: only configure if explicitly provided
-            String redisUrl = envMap.get("REDIS_URL");
-            if (redisUrl == null) redisUrl = System.getenv("REDIS_URL");
-            if (redisUrl != null && !redisUrl.trim().isEmpty()) {
-                System.setProperty("spring.data.redis.url", redisUrl.trim());
+            // Dedicated Redis configuration handlers
+            String redisHost = System.getenv("REDIS_HOST");
+            if (redisHost == null || redisHost.trim().isEmpty()) redisHost = envMap.get("REDIS_HOST");
+            if (redisHost != null && !redisHost.trim().isEmpty()) {
+                System.setProperty("spring.data.redis.host", redisHost.trim());
             }
 
-            String redisPassword = envMap.get("REDIS_PASSWORD");
-            if (redisPassword == null) redisPassword = System.getenv("REDIS_PASSWORD");
+            String redisPort = System.getenv("REDIS_PORT");
+            if (redisPort == null || redisPort.trim().isEmpty()) redisPort = envMap.get("REDIS_PORT");
+            if (redisPort != null && !redisPort.trim().isEmpty()) {
+                System.setProperty("spring.data.redis.port", redisPort.trim());
+            }
+
+            String redisUsername = System.getenv("REDIS_USERNAME");
+            if (redisUsername == null || redisUsername.trim().isEmpty()) redisUsername = envMap.get("REDIS_USERNAME");
+            if (redisUsername != null && !redisUsername.trim().isEmpty()) {
+                System.setProperty("spring.data.redis.username", redisUsername.trim());
+            }
+
+            String redisPassword = System.getenv("REDIS_PASSWORD");
+            if (redisPassword == null || redisPassword.trim().isEmpty()) redisPassword = envMap.get("REDIS_PASSWORD");
             if (redisPassword != null && !redisPassword.trim().isEmpty()) {
                 System.setProperty("spring.data.redis.password", redisPassword.trim());
+            }
+
+            String redisSsl = System.getenv("REDIS_SSL");
+            if (redisSsl == null || redisSsl.trim().isEmpty()) redisSsl = envMap.get("REDIS_SSL");
+            if (redisSsl != null && !redisSsl.trim().isEmpty()) {
+                System.setProperty("spring.data.redis.ssl.enabled", redisSsl.trim());
+            }
+
+            String redisUrl = System.getenv("REDIS_URL");
+            if (redisUrl == null || redisUrl.trim().isEmpty()) redisUrl = envMap.get("REDIS_URL");
+            if (redisUrl != null && !redisUrl.trim().isEmpty()) {
+                System.setProperty("spring.data.redis.url", redisUrl.trim());
             }
 
             // If connecting to Supabase pooler, ensure sslmode=require is present
