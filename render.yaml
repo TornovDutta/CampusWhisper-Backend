@@ -17,13 +17,16 @@ services:
       - key: CORS_ALLOWED_ORIGINS
         value: "http://localhost:3000,http://localhost:5173,https://*.onrender.com"
       - key: SPRING_DATASOURCE_URL
-        fromDatabase:
-          name: campuswhisper-db
-          property: connectionString
-
-databases:
-  - name: campuswhisper-db
-    plan: free
-    region: oregon
-    databaseName: whisper
-    user: whisper_user
+        value: "jdbc:postgresql://aws-0-ap-southeast-2.pooler.supabase.com:5432/whisper?sslmode=require"
+      - key: DB_USER
+        value: "postgres.twanulrsdffxbrgpdnch"
+      - key: DB_PASSWORD
+        value: "Tornov@#129"
+      - key: REDIS_HOST
+        value: "redis-14160.c3.ap-south-1-1.ec2.cloud.redislabs.com"
+      - key: REDIS_PORT
+        value: "14160"
+      - key: REDIS_USERNAME
+        value: "default"
+      - key: REDIS_PASSWORD
+        value: "7SaSqPnUwhWbI3ViEsDxJKgtyWpdjRsV"
