@@ -6,6 +6,10 @@ import org.springframework.boot.test.context.SpringBootTest;
 @SpringBootTest
 class WhisperApplicationTests {
 
+    static {
+        WhisperApplication.loadDotEnv();
+    }
+
 	@Test
 	void contextLoads() {
 	}

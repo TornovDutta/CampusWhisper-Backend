@@ -5,9 +5,9 @@ spring:
   application:
     name: whisper
   datasource:
-    url: ${SPRING_DATASOURCE_URL:${DATABASE_URL:jdbc:postgresql://${DB_HOST:aws-0-ap-southeast-2.pooler.supabase.com}:${DB_PORT:5432}/${DB_NAME:whisper}?sslmode=require}}
-    username: ${DB_USER:${SPRING_DATASOURCE_USERNAME:postgres.twanulrsdffxbrgpdnch}}
-    password: ${DB_PASSWORD:${SPRING_DATASOURCE_PASSWORD:Tornov@#129}}
+    url: ${SPRING_DATASOURCE_URL:${DATABASE_URL:jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:whisper}}}
+    username: ${DB_USER:${SPRING_DATASOURCE_USERNAME:}}
+    password: ${DB_PASSWORD:${SPRING_DATASOURCE_PASSWORD:}}
     driver-class-name: org.postgresql.Driver
     hikari:
       connection-timeout: 30000

@@ -21,12 +21,15 @@ public class WhisperApplication {
         SpringApplication.run(WhisperApplication.class, args);
     }
 
-    private static void loadDotEnv() {
+    public static void loadDotEnv() {
         Map<String, String> envMap = new HashMap<>();
         File[] candidateFiles = new File[] {
             new File(".env"),
             new File("CampusWhisper-Backend/.env"),
-            new File("../CampusWhisper-Backend/.env")
+            new File("../CampusWhisper-Backend/.env"),
+            new File("/etc/secrets/.env"),
+            new File("/etc/secrets/secrets.env"),
+            new File(System.getProperty("user.dir"), ".env")
         };
 
         File envFile = null;
@@ -38,6 +41,7 @@ public class WhisperApplication {
         }
 
         if (envFile != null) {
+            System.out.println("[Whisper] Loading environment variables from: " + envFile.getAbsolutePath());
             try {
                 List<String> lines = Files.readAllLines(envFile.toPath());
                 for (String line : lines) {
@@ -66,10 +70,11 @@ public class WhisperApplication {
                     envMap.put(key, val);
                 }
 
+                // Push all resolved variables into System properties
                 for (Map.Entry<String, String> entry : envMap.entrySet()) {
                     String key = entry.getKey();
                     String val = entry.getValue();
-                    if (!val.isEmpty() && System.getProperty(key) == null && System.getenv(key) == null) {
+                    if (!val.isEmpty()) {
                         System.setProperty(key, val);
                     }
                 }
@@ -79,7 +84,7 @@ public class WhisperApplication {
         }
 
         // =========================================================================
-        // Database Configuration (runs on both local and Render production)
+        // Database Configuration (mapped from .env or environment)
         // =========================================================================
         String dbUrl = System.getenv("SPRING_DATASOURCE_URL");
         if (dbUrl == null || dbUrl.trim().isEmpty()) dbUrl = System.getenv("DATABASE_URL");
@@ -140,54 +145,53 @@ public class WhisperApplication {
             }
         }
 
-        // Direct DB_USER and DB_PASSWORD overrides
+        // Direct DB_USER and DB_PASSWORD overrides from environment or .env
         String dbUser = System.getenv("DB_USER");
         if (dbUser == null || dbUser.trim().isEmpty()) dbUser = System.getenv("SPRING_DATASOURCE_USERNAME");
         if (dbUser == null || dbUser.trim().isEmpty()) dbUser = envMap.get("DB_USER");
         if (dbUser == null || dbUser.trim().isEmpty()) dbUser = envMap.get("SPRING_DATASOURCE_USERNAME");
-        if (dbUser == null || dbUser.trim().isEmpty()) dbUser = "postgres.twanulrsdffxbrgpdnch";
-        
-        System.setProperty("DB_USER", dbUser.trim());
-        System.setProperty("SPRING_DATASOURCE_USERNAME", dbUser.trim());
-        System.setProperty("spring.datasource.username", dbUser.trim());
+        if (dbUser != null && !dbUser.trim().isEmpty()) {
+            System.setProperty("DB_USER", dbUser.trim());
+            System.setProperty("SPRING_DATASOURCE_USERNAME", dbUser.trim());
+            System.setProperty("spring.datasource.username", dbUser.trim());
+        }
 
         String dbPassword = System.getenv("DB_PASSWORD");
         if (dbPassword == null || dbPassword.trim().isEmpty()) dbPassword = System.getenv("SPRING_DATASOURCE_PASSWORD");
         if (dbPassword == null || dbPassword.trim().isEmpty()) dbPassword = envMap.get("DB_PASSWORD");
         if (dbPassword == null || dbPassword.trim().isEmpty()) dbPassword = envMap.get("SPRING_DATASOURCE_PASSWORD");
-        if (dbPassword == null || dbPassword.trim().isEmpty()) dbPassword = "Tornov@#129";
-
-        System.setProperty("DB_PASSWORD", dbPassword.trim());
-        System.setProperty("SPRING_DATASOURCE_PASSWORD", dbPassword.trim());
-        System.setProperty("spring.datasource.password", dbPassword.trim());
-
-        System.out.println("=================================================");
-        System.out.println("[Whisper Startup] DB User: " + System.getProperty("spring.datasource.username"));
-        System.out.println("[Whisper Startup] DB URL:  " + System.getProperty("spring.datasource.url"));
-        System.out.println("=================================================");
+        if (dbPassword != null && !dbPassword.trim().isEmpty()) {
+            System.setProperty("DB_PASSWORD", dbPassword.trim());
+            System.setProperty("SPRING_DATASOURCE_PASSWORD", dbPassword.trim());
+            System.setProperty("spring.datasource.password", dbPassword.trim());
+        }
 
         // =========================================================================
-        // Redis Configuration (runs on both local and Render production)
+        // Redis Configuration (mapped from .env or environment)
         // =========================================================================
         String redisHost = System.getenv("REDIS_HOST");
         if (redisHost == null || redisHost.trim().isEmpty()) redisHost = envMap.get("REDIS_HOST");
-        if (redisHost == null || redisHost.trim().isEmpty()) redisHost = "redis-14160.c3.ap-south-1-1.ec2.cloud.redislabs.com";
-        System.setProperty("spring.data.redis.host", redisHost.trim());
+        if (redisHost != null && !redisHost.trim().isEmpty()) {
+            System.setProperty("spring.data.redis.host", redisHost.trim());
+        }
 
         String redisPort = System.getenv("REDIS_PORT");
         if (redisPort == null || redisPort.trim().isEmpty()) redisPort = envMap.get("REDIS_PORT");
-        if (redisPort == null || redisPort.trim().isEmpty()) redisPort = "14160";
-        System.setProperty("spring.data.redis.port", redisPort.trim());
+        if (redisPort != null && !redisPort.trim().isEmpty()) {
+            System.setProperty("spring.data.redis.port", redisPort.trim());
+        }
 
         String redisUsername = System.getenv("REDIS_USERNAME");
         if (redisUsername == null || redisUsername.trim().isEmpty()) redisUsername = envMap.get("REDIS_USERNAME");
-        if (redisUsername == null || redisUsername.trim().isEmpty()) redisUsername = "default";
-        System.setProperty("spring.data.redis.username", redisUsername.trim());
+        if (redisUsername != null && !redisUsername.trim().isEmpty()) {
+            System.setProperty("spring.data.redis.username", redisUsername.trim());
+        }
 
         String redisPassword = System.getenv("REDIS_PASSWORD");
         if (redisPassword == null || redisPassword.trim().isEmpty()) redisPassword = envMap.get("REDIS_PASSWORD");
-        if (redisPassword == null || redisPassword.trim().isEmpty()) redisPassword = "7SaSqPnUwhWbI3ViEsDxJKgtyWpdjRsV";
-        System.setProperty("spring.data.redis.password", redisPassword.trim());
+        if (redisPassword != null && !redisPassword.trim().isEmpty()) {
+            System.setProperty("spring.data.redis.password", redisPassword.trim());
+        }
 
         String redisSsl = System.getenv("REDIS_SSL");
         if (redisSsl == null || redisSsl.trim().isEmpty()) redisSsl = envMap.get("REDIS_SSL");
