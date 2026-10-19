@@ -1,0 +1,29 @@
+services:
+  - type: web
+    name: campuswhisper-backend
+    runtime: docker
+    plan: free
+    region: oregon
+    dockerfilePath: ./Dockerfile
+    envVars:
+      - key: PORT
+        value: 10000
+      - key: HIBERNATE_DDL_AUTO
+        value: update
+      - key: SHOW_SQL
+        value: "false"
+      - key: JWT_SECRET
+        generateValue: true
+      - key: CORS_ALLOWED_ORIGINS
+        value: "http://localhost:3000,http://localhost:5173,https://*.onrender.com"
+      - key: SPRING_DATASOURCE_URL
+        fromDatabase:
+          name: campuswhisper-db
+          property: connectionString
+
+databases:
+  - name: campuswhisper-db
+    plan: free
+    region: oregon
+    databaseName: whisper
+    user: whisper_user

@@ -9,6 +9,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import com.campus.whisper.security.services.UserDetailsImpl;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
@@ -44,8 +46,12 @@ public class PostController {
 
     @PostMapping
     @CacheEvict(value = "posts", allEntries = true)
-    public ResponseEntity<?> createPost(@Valid @RequestBody PostRequest request) {
+    public ResponseEntity<?> createPost(@Valid @RequestBody PostRequest request, Authentication authentication) {
         Post post = new Post();
+        if (authentication != null && authentication.getPrincipal() instanceof UserDetailsImpl) {
+            UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
+            post.setUserId(userDetails.getId());
+        }
         post.setAnonymousUsername("Anonymous"); // Real app might generate random adjectives
         post.setContent(request.getContent());
         post.setCategory(request.getCategory());

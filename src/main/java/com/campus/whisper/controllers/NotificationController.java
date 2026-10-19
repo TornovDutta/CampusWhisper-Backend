@@ -29,4 +29,33 @@ public class NotificationController {
         List<Notification> notifications = notificationRepository.findByUserIdOrderByCreatedAtDesc(userDetails.getId());
         return ResponseEntity.ok(notifications);
     }
+
+    @PutMapping("/read-all")
+    public ResponseEntity<?> markAllAsRead(Authentication authentication) {
+        if (authentication == null || !(authentication.getPrincipal() instanceof UserDetailsImpl)) {
+            return ResponseEntity.status(401).body(new MessageResponse("Error: Unauthorized"));
+        }
+        UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
+        List<Notification> notifications = notificationRepository.findByUserIdOrderByCreatedAtDesc(userDetails.getId());
+        for (Notification notif : notifications) {
+            notif.setRead(true);
+        }
+        notificationRepository.saveAll(notifications);
+        return ResponseEntity.ok(new MessageResponse("All notifications marked as read"));
+    }
+
+    @PutMapping("/{id}/read")
+    public ResponseEntity<?> markAsRead(@PathVariable Long id, Authentication authentication) {
+        if (authentication == null || !(authentication.getPrincipal() instanceof UserDetailsImpl)) {
+            return ResponseEntity.status(401).body(new MessageResponse("Error: Unauthorized"));
+        }
+        UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
+        Notification notif = notificationRepository.findById(id).orElse(null);
+        if (notif == null || !notif.getUserId().equals(userDetails.getId())) {
+            return ResponseEntity.notFound().build();
+        }
+        notif.setRead(true);
+        notificationRepository.save(notif);
+        return ResponseEntity.ok(notif);
+    }
 }

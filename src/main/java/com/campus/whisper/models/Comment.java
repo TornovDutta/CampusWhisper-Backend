@@ -19,11 +19,15 @@ public class Comment {
     @Column(nullable = false)
     private Long postId;
 
+    private Long userId;
+
     @Column(nullable = false)
     private String anonymousUsername;
 
     @Column(nullable = false, length = 500)
     private String content;
+
+    private int upvotes = 0;
 
     @Column(nullable = false)
     private LocalDateTime createdAt = LocalDateTime.now();
