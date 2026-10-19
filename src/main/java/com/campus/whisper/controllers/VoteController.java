@@ -2,6 +2,7 @@ package com.campus.whisper.controllers;
 
 import com.campus.whisper.models.Post;
 import com.campus.whisper.models.Vote;
+import com.campus.whisper.models.VoteType;
 import com.campus.whisper.payload.request.VoteRequest;
 import com.campus.whisper.payload.response.MessageResponse;
 import com.campus.whisper.repository.PostRepository;
@@ -36,6 +37,13 @@ public class VoteController {
         UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
         Long userId = userDetails.getId();
 
+        VoteType voteType;
+        try {
+            voteType = VoteType.valueOf(request.getType().toLowerCase());
+        } catch (IllegalArgumentException | NullPointerException e) {
+            return ResponseEntity.badRequest().body(new MessageResponse("Error: Invalid vote type. Must be 'upvote' or 'downvote'"));
+        }
+
         Post post = postRepository.findById(request.getPostId()).orElse(null);
         if (post == null) {
             return ResponseEntity.badRequest().body(new MessageResponse("Error: Post not found"));
@@ -45,20 +53,20 @@ public class VoteController {
         if (existingVote.isPresent()) {
             Vote vote = existingVote.get();
             // Undo previous vote effect
-            if (vote.getType().equals("upvote")) {
+            if (vote.getType() == VoteType.upvote) {
                 post.setUpvotes(post.getUpvotes() - 1);
-            } else if (vote.getType().equals("downvote")) {
+            } else if (vote.getType() == VoteType.downvote) {
                 post.setDownvotes(post.getDownvotes() - 1);
             }
 
             // If same type, it's a toggle off (destroy the vote)
-            if (vote.getType().equals(request.getType())) {
+            if (vote.getType() == voteType) {
                 voteRepository.delete(vote);
             } else {
                 // Change vote type
-                vote.setType(request.getType());
-                if (request.getType().equals("upvote")) post.setUpvotes(post.getUpvotes() + 1);
-                if (request.getType().equals("downvote")) post.setDownvotes(post.getDownvotes() + 1);
+                vote.setType(voteType);
+                if (voteType == VoteType.upvote) post.setUpvotes(post.getUpvotes() + 1);
+                if (voteType == VoteType.downvote) post.setDownvotes(post.getDownvotes() + 1);
                 voteRepository.save(vote);
             }
         } else {
@@ -66,11 +74,11 @@ public class VoteController {
             Vote vote = new Vote();
             vote.setPostId(request.getPostId());
             vote.setUserId(userId);
-            vote.setType(request.getType());
+            vote.setType(voteType);
             voteRepository.save(vote);
 
-            if (request.getType().equals("upvote")) post.setUpvotes(post.getUpvotes() + 1);
-            if (request.getType().equals("downvote")) post.setDownvotes(post.getDownvotes() + 1);
+            if (voteType == VoteType.upvote) post.setUpvotes(post.getUpvotes() + 1);
+            if (voteType == VoteType.downvote) post.setDownvotes(post.getDownvotes() + 1);
         }
 
         postRepository.save(post);

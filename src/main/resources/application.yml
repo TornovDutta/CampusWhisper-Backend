@@ -1,26 +1,17 @@
 server:
   port: ${SERVER_PORT:8080}
-  ssl:
-    enabled: ${SSL_ENABLED:false}
-    key-store: ${SSL_KEY_STORE:classpath:keystore.p12}
-    key-store-password: ${SSL_KEY_STORE_PASSWORD:whisper}
-    key-store-type: ${SSL_KEY_STORE_TYPE:PKCS12}
-    key-alias: ${SSL_KEY_ALIAS:whisper}
 
 spring:
   application:
     name: whisper
   datasource:
     url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:whisper}}
-    username: ${DB_USER:${SPRING_DATASOURCE_USERNAME:whisper_user}}
-    password: ${DB_PASSWORD:${SPRING_DATASOURCE_PASSWORD:whisper_password}}
+    username: ${DB_USER:${SPRING_DATASOURCE_USERNAME:postgres}}
+    password: ${DB_PASSWORD:${SPRING_DATASOURCE_PASSWORD:Tornov@#129}}
   jpa:
     hibernate:
       ddl-auto: ${HIBERNATE_DDL_AUTO:update}
     show-sql: ${SHOW_SQL:true}
-    properties:
-      hibernate:
-        dialect: org.hibernate.dialect.PostgreSQLDialect
   data:
     redis:
       host: ${REDIS_HOST:${SPRING_REDIS_HOST:localhost}}
