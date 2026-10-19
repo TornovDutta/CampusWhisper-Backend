@@ -88,32 +88,39 @@ public class WhisperApplication {
 
         if (dbUrl != null && !dbUrl.trim().isEmpty()) {
             dbUrl = dbUrl.trim();
-            // Standardize postgres:// or postgresql:// into jdbc:postgresql://
-            if (dbUrl.startsWith("postgres://") || dbUrl.startsWith("postgresql://") || (dbUrl.startsWith("jdbc:postgresql://") && dbUrl.contains("@"))) {
+            // Handle URLs with embedded credentials (e.g. postgresql://user:password@host:port/dbname)
+            if (dbUrl.contains("@")) {
                 try {
                     String clean = dbUrl.replace("jdbc:", "");
-                    java.net.URI uri = java.net.URI.create(clean);
-                    String host = uri.getHost();
-                    int port = uri.getPort() == -1 ? 5432 : uri.getPort();
-                    String path = uri.getPath();
-                    String userInfo = uri.getUserInfo();
+                    int lastAt = clean.lastIndexOf('@');
+                    String userInfoPart = clean.substring(0, lastAt);
+                    String hostPortDb = clean.substring(lastAt + 1);
 
-                    String jdbcUrl = "jdbc:postgresql://" + host + ":" + port + path;
-                    if (uri.getQuery() != null && !uri.getQuery().isEmpty()) {
-                        jdbcUrl += "?" + uri.getQuery();
+                    int schemeIdx = userInfoPart.indexOf("://");
+                    if (schemeIdx != -1) {
+                        userInfoPart = userInfoPart.substring(schemeIdx + 3);
                     }
-                    if (host != null && host.contains("supabase.co") && !jdbcUrl.contains("sslmode")) {
+
+                    int firstColon = userInfoPart.indexOf(':');
+                    if (firstColon != -1) {
+                        String user = userInfoPart.substring(0, firstColon);
+                        String pass = userInfoPart.substring(firstColon + 1);
+                        System.setProperty("DB_USER", user);
+                        System.setProperty("SPRING_DATASOURCE_USERNAME", user);
+                        System.setProperty("spring.datasource.username", user);
+
+                        System.setProperty("DB_PASSWORD", pass);
+                        System.setProperty("SPRING_DATASOURCE_PASSWORD", pass);
+                        System.setProperty("spring.datasource.password", pass);
+                    }
+
+                    String jdbcUrl = "jdbc:postgresql://" + hostPortDb;
+                    if (hostPortDb.contains("supabase.co") && !jdbcUrl.contains("sslmode")) {
                         jdbcUrl += (jdbcUrl.contains("?") ? "&" : "?") + "sslmode=require";
                     }
 
                     System.setProperty("spring.datasource.url", jdbcUrl);
                     System.setProperty("SPRING_DATASOURCE_URL", jdbcUrl);
-
-                    if (userInfo != null && userInfo.contains(":")) {
-                        String[] parts = userInfo.split(":", 2);
-                        System.setProperty("spring.datasource.username", parts[0]);
-                        System.setProperty("spring.datasource.password", parts[1]);
-                    }
                 } catch (Exception ex) {
                     if (!dbUrl.startsWith("jdbc:")) {
                         dbUrl = "jdbc:" + dbUrl;
@@ -131,6 +138,27 @@ public class WhisperApplication {
                 System.setProperty("spring.datasource.url", dbUrl);
                 System.setProperty("SPRING_DATASOURCE_URL", dbUrl);
             }
+        }
+
+        // Direct DB_USER and DB_PASSWORD overrides
+        String dbUser = System.getenv("DB_USER");
+        if (dbUser == null || dbUser.trim().isEmpty()) dbUser = System.getenv("SPRING_DATASOURCE_USERNAME");
+        if (dbUser == null || dbUser.trim().isEmpty()) dbUser = envMap.get("DB_USER");
+        if (dbUser == null || dbUser.trim().isEmpty()) dbUser = envMap.get("SPRING_DATASOURCE_USERNAME");
+        if (dbUser != null && !dbUser.trim().isEmpty()) {
+            System.setProperty("DB_USER", dbUser.trim());
+            System.setProperty("SPRING_DATASOURCE_USERNAME", dbUser.trim());
+            System.setProperty("spring.datasource.username", dbUser.trim());
+        }
+
+        String dbPassword = System.getenv("DB_PASSWORD");
+        if (dbPassword == null || dbPassword.trim().isEmpty()) dbPassword = System.getenv("SPRING_DATASOURCE_PASSWORD");
+        if (dbPassword == null || dbPassword.trim().isEmpty()) dbPassword = envMap.get("DB_PASSWORD");
+        if (dbPassword == null || dbPassword.trim().isEmpty()) dbPassword = envMap.get("SPRING_DATASOURCE_PASSWORD");
+        if (dbPassword != null && !dbPassword.trim().isEmpty()) {
+            System.setProperty("DB_PASSWORD", dbPassword.trim());
+            System.setProperty("SPRING_DATASOURCE_PASSWORD", dbPassword.trim());
+            System.setProperty("spring.datasource.password", dbPassword.trim());
         }
 
         // =========================================================================
