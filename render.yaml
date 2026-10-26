@@ -5,6 +5,7 @@ services:
     plan: free
     region: oregon
     dockerfilePath: ./Dockerfile
+    healthCheckPath: /api/health
     envVars:
       - key: PORT
         value: 10000

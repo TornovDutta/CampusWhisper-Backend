@@ -16,6 +16,7 @@ A secure, scalable RESTful API service powering the CampusWhisper anonymous stud
   - [Option A: Running with Docker Compose (Recommended)](#option-a-running-with-docker-compose-recommended)
   - [Option B: Running Locally with Maven](#option-b-running-locally-with-maven)
 - [REST API Reference](#rest-api-reference)
+  - [Health Check Endpoint](#health-check-endpoint)
   - [Authentication Endpoints](#authentication-endpoints)
   - [Whisper Posts Endpoints](#whisper-posts-endpoints)
   - [Comment Endpoints](#comment-endpoints)
@@ -246,6 +247,21 @@ All protected endpoints require the following HTTP header:
 ```
 Authorization: Bearer <YOUR_JWT_TOKEN>
 ```
+
+### Health Check Endpoint
+
+#### 1. Service Health Status
+* **Endpoint:** `GET /api/health` (or `GET /health`)
+* **Access:** Public (No authentication required)
+* **Response (200 OK):**
+  ```json
+  {
+    "status": "UP",
+    "service": "CampusWhisper Backend",
+    "message": "Service is healthy and running",
+    "timestamp": "2026-10-26T08:25:00Z"
+  }
+  ```
 
 ### Authentication Endpoints
 
