@@ -40,7 +40,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class WebSecurityConfig {
 
-    @Value("${cors.allowed-origins:http://localhost:3000,http://localhost:5173,https://*.onrender.com}")
+    @Value("${cors.allowed-origins:http://localhost:3000,http://localhost:5173,https://*.onrender.com,https://*.vercel.app}")
     private String allowedOrigins;
 
     @Autowired
@@ -105,6 +105,10 @@ public class WebSecurityConfig {
         configuration.setAllowedHeaders(Arrays.asList(
                 "Authorization", "Content-Type", "Accept", "Origin", "X-Requested-With"
         ));
+        configuration.setExposedHeaders(Arrays.asList(
+                "Authorization", "Content-Type", "Accept", "X-Total-Count"
+        ));
+        configuration.setMaxAge(3600L);
         configuration.setAllowCredentials(true);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
